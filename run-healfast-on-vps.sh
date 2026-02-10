@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# HealFast USA – single script to install, build, run, and configure SSL on Ubuntu 22 LTS (VPS)
+# HealsFast USA – single script to install, build, run, and configure SSL on Ubuntu 22 LTS (VPS)
 # Target server: administrator@69.30.247.92
 # Domains: clinic.healfastusa.org, admin.healfastusa.org, staff.healfastusa.org (SSL via Let's Encrypt)
 # Timezone: Africa/Lagos
@@ -84,13 +84,13 @@ if [[ "${1:-}" == "vps-only" ]]; then
   sudo docker stop "$APP_NAME" 2>/dev/null || true
   sudo docker rm "$APP_NAME" 2>/dev/null || true
   sudo docker run -d -p 127.0.0.1:8091:8091 --name "$APP_NAME" --restart unless-stopped "$APP_NAME"
-  echo "HealFast USA container running (localhost:8091). Timezone: $TIMEZONE"
+  echo "HealsFast USA container running (localhost:8091). Timezone: $TIMEZONE"
   exit 0
 fi
 
 # --- Run system only: start/restart app container + Nginx (no install/build) ---
 if [[ -n "$RUN_SYSTEM_ONLY" ]]; then
-  echo "=== HealFast USA – starting system ==="
+  echo "=== HealsFast USA – starting system ==="
   sudo timedatectl set-timezone "$TIMEZONE" 2>/dev/null || true
   echo "  Timezone: $TIMEZONE ($(date))"
   if [[ -d /opt/healfast-usa ]]; then
@@ -123,7 +123,7 @@ if [[ -n "$RUN_SYSTEM_ONLY" ]]; then
 fi
 
 # ========== Run on VPS (Ubuntu 22) – full setup ==========
-echo "=== HealFast USA – full setup on Ubuntu 22 (${VPS_USER}@${VPS_IP}) ==="
+echo "=== HealsFast USA – full setup on Ubuntu 22 (${VPS_USER}@${VPS_IP}) ==="
 echo "  Domains: ${DOMAINS[*]}"
 echo "  Timezone: $TIMEZONE"
 echo ""
@@ -181,8 +181,8 @@ if ! command -v docker &>/dev/null; then
 fi
 sudo docker -v
 
-# 6) Build and run HealFast USA container (bind to localhost only; Nginx will proxy)
-echo "[6/8] Building HealFast USA and starting container..."
+# 6) Build and run HealsFast USA container (bind to localhost only; Nginx will proxy)
+echo "[6/8] Building HealsFast USA and starting container..."
 
 if [[ ! -d "$REPO_ROOT/ui/dist" ]] || [[ ! -f "$REPO_ROOT/ui/dist/index.html" ]]; then
   echo "  Building micro-frontends..."
@@ -200,10 +200,10 @@ sudo docker run -d -p 127.0.0.1:8091:8091 --name "$APP_NAME" --restart unless-st
 echo "[7/8] Installing Nginx and Certbot..."
 sudo apt-get install -y -qq nginx certbot python3-certbot-nginx
 
-# Nginx config for HealFast USA (HTTP first; certbot adds SSL)
+# Nginx config for HealsFast USA (HTTP first; certbot adds SSL)
 HEALFAST_NGINX_HTTP="/etc/nginx/sites-available/healfast-usa"
 sudo tee "$HEALFAST_NGINX_HTTP" > /dev/null << 'NGINX_HTTP'
-# HealFast USA – HTTP (for initial certbot)
+# HealsFast USA – HTTP (for initial certbot)
 server {
     listen 80;
     listen [::]:80;
@@ -241,7 +241,7 @@ if sudo test -f /etc/letsencrypt/live/clinic.healfastusa.org/fullchain.pem 2>/de
 fi
 
 echo ""
-echo "=== HealFast USA setup complete – system is running ==="
+echo "=== HealsFast USA setup complete – system is running ==="
 echo "  Timezone: $TIMEZONE ($(date))"
 echo "  App (container): http://127.0.0.1:8091"
 echo "  Public URLs (HTTPS):"

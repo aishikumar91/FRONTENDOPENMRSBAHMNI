@@ -514,9 +514,17 @@ body {
   font-size: 12px;
   color: #898989;
   img {
-    width: 55px;
+    max-width: 45px;
+    width: 100%;
+    height: auto;
     vertical-align: middle;
     margin: 0 1px;
+    object-fit: contain;
+  }
+  @media screen and (max-width: 768px) {
+    img {
+      max-width: 36px;
+    }
   }
   a {
     color: #000;
@@ -527,14 +535,27 @@ body {
   text-align: center;
   padding-top: 10px;
   img {
-    max-width: 200px;
+    max-width: 120px;
+    width: 100%;
+    height: auto;
     vertical-align: middle;
-    max-height: 120px;
+    object-fit: contain;
+  }
+  .implementor-logo {
+    max-width: 100px;
   }
   span {
     vertical-align: middle;
     color: #888;
     font-size: 20px;
+  }
+  @media screen and (max-width: 768px) {
+    img {
+      max-width: 90px;
+    }
+    .implementor-logo {
+      max-width: 80px;
+    }
   }
 }
 

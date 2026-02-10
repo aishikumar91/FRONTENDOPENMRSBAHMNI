@@ -5,7 +5,7 @@
 	<meta charset="UTF-8" />
 	<meta name="robots" content="noindex,nofollow" />
 	<meta name="googlebot" content="noindex,nofollow" />
-	<title>Bahmni</title>
+	<title>HealsFast USA</title>
 	<style>
 		html {
 			overflow: auto;
@@ -123,9 +123,14 @@
 		}
 
 		.power-by img {
-			width: 55px;
+			max-width: 45px;
+			height: auto;
 			vertical-align: middle;
 			margin: 0 1px;
+			object-fit: contain;
+		}
+		@media (max-width: 768px) {
+			.power-by img { max-width: 36px; }
 		}
 
 		.power-by a {
@@ -139,9 +144,14 @@
 		}
 
 		.clint-logo-wrapper img {
-			max-width: 200px;
+			max-width: 120px;
+			width: 100%;
+			height: auto;
 			vertical-align: middle;
-			max-height: 120px;
+			object-fit: contain;
+		}
+		@media (max-width: 768px) {
+			.clint-logo-wrapper img { max-width: 90px; }
 		}
 
 		.clint-logo-wrapper span {
@@ -179,10 +189,14 @@
 		function callAjax(url, callback) {
 			var xmlhttp = new XMLHttpRequest();
 			xmlhttp.onreadystatechange = function () {
-				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-					try {
-						callback(JSON.parse(xmlhttp.responseText));
-					} catch (ex) {
+				if (xmlhttp.readyState == 4) {
+					if (xmlhttp.status == 200) {
+						try {
+							callback(JSON.parse(xmlhttp.responseText));
+						} catch (ex) {
+							callback(undefined);
+						}
+					} else {
 						callback(undefined);
 					}
 				}
@@ -284,25 +298,45 @@
 			return app.link ?? "/";
 		};
 
+		var defaultApps = [
+			{ title: "Login", link: "/bahmni/home/index.html", logo: "/bahmni/images/app.png" },
+			{ title: "Clinical", link: "/bahmni/clinical/index.html", logo: "/bahmni/images/app.png" },
+			{ title: "Registration", link: "/bahmni/registration/index.html", logo: "/bahmni/images/app.png" },
+			{ title: "ADT", link: "/bahmni/adt/index.html", logo: "/bahmni/images/app.png" },
+			{ title: "Reports", link: "/bahmni/reports/index.html", logo: "/bahmni/images/app.png" },
+			{ title: "Admin", link: "/bahmni/admin/index.html", logo: "/bahmni/images/app.png" }
+		];
+
+		function renderAppTiles(apps) {
+			const sections = document.getElementsByClassName("sections")[0];
+			if (!sections) return;
+			sections.innerHTML = "";
+			for (var i = 0; i < apps.length; i++) {
+				var app = apps[i];
+				var href = app.link || getAppLink(app);
+				var logo = app.logo || "/bahmni/images/app.png";
+				var title = app.title || app.name || "App";
+				sections.innerHTML += "<div class=\"section\"><div class=\"launch\"><a href=\"" + href + "\"><img src=\"" + logo + "\" onerror=\"this.src='/bahmni/images/app.png'\" /><span> " + title + "</span></a></div></div>";
+			}
+		}
+
 		function getApps() {
 			callAjax(
 				"/bahmni_config/openmrs/apps/home/whiteLabel.json",
 				function (data) {
-					if (data && data.landingPage) {
-						const sections = document.getElementsByClassName("sections")[0];
-						for (app of data.landingPage) {
-							if (app.enabled) {
-								sections.innerHTML += `<div class="section">
-			                             <div class="launch">
-			                                 <a href="${getAppLink(app)}">
-			                                 <img src="${app.logo}" />
-			                                 <span> ${app.title}</span>
-			                                 </a>
-			                             </div>
-			                          </div>`;
-							}
+					var sections = document.getElementsByClassName("sections")[0];
+					if (data && data.landingPage && data.landingPage.length > 0) {
+						var apps = [];
+						for (var j = 0; j < data.landingPage.length; j++) {
+							var app = data.landingPage[j];
+							if (app.enabled) apps.push(app);
+						}
+						if (apps.length > 0) {
+							renderAppTiles(apps);
+							return;
 						}
 					}
+					renderAppTiles(defaultApps);
 				}
 			);
 		}
@@ -311,11 +345,11 @@
 
 <body onload="init()">
 	<div class="clint-logo-wrapper">
-		<img class="client_logo" src="/bahmni/images/healfastLogoFull.png" />
-		<span class="title_text"> HealFast USA </span>
+		<img class="client_logo" src="/bahmni/images/healfastLogoFull.png" alt="HealsFast USA" />
+		<span class="title_text"> HealsFast USA </span>
 	</div>
 	<div class="header_text">
-		<b>WELCOME TO<br />HealFast USA EMR & HOSPITAL SERVICE</b>
+		<b>WELCOME TO<br />HealsFast USA EMR & HOSPITAL SERVICE</b>
 	</div>
 	<div class="container">
 		<h4>GET STARTED</h4>
@@ -330,9 +364,9 @@
 		<img id="bottom-banner-image" />
 	</div>
 	<div class="power-by">
-		<img src="/bahmni/images/healfastLogoFull.png" alt="HealFast USA" />
+		<img src="/bahmni/images/healfastLogoFull.png" alt="HealsFast USA" />
 		<a class="helper_url" href="https://bahmni.atlassian.net/wiki/display/BAH/Bahmni+Home">
-			HealFast USA Help</a>
+			HealsFast USA Help</a>
 	</div>
 </body>
 

@@ -1,6 +1,6 @@
-# HealFast USA – Deployment on Ubuntu 22 LTS VPS
+# HealsFast USA – Deployment on Ubuntu 22 LTS VPS
 
-This app is branded as **HealFast USA**. Deploy to Ubuntu 22 LTS at **administrator@69.30.247.92** with SSL for **clinic.healfastusa.org**, **admin.healfastusa.org**, and **staff.healfastusa.org**. Server timezone is **Africa/Lagos**.
+This app is branded as **HealsFast USA**. Deploy to Ubuntu 22 LTS at **administrator@69.30.247.92** with SSL for **clinic.healfastusa.org**, **admin.healfastusa.org**, and **staff.healfastusa.org**. Server timezone is **Africa/Lagos**.
 
 ## Single script (recommended)
 
@@ -11,6 +11,8 @@ One script installs dependencies, builds the app, runs it in Docker, sets timezo
 - DNS: Point **clinic.healfastusa.org**, **admin.healfastusa.org**, and **staff.healfastusa.org** to **69.30.247.92** (A records) before running so Certbot can issue certificates.
 
 ### Option 1: Run on the VPS
+
+**Note:** The script must run **on the Ubuntu server**, not on Windows. On Windows use Option 2 (deploy from your machine) or SSH into the server and run the commands there. `sudo` is not available on Windows.
 
 1. Copy the repo to the server:
    ```bash
@@ -35,7 +37,7 @@ This builds the app, rsyncs to **administrator@69.30.247.92:/opt/healfast-usa/**
 
 ### Run the system (after setup or after reboot)
 
-To start or restart the HealFast USA system (app container + Nginx) without reinstalling:
+To start or restart the HealsFast USA system (app container + Nginx) without reinstalling:
 
 ```bash
 sudo bash /opt/healfast-usa/run-healfast-on-vps.sh --run-system
@@ -54,7 +56,7 @@ Use this after a server reboot or whenever you want to bring the system up.
 
 ## Logo files
 
-- **HealFast logos:** `ui/app/images/healfastLogoFull.png` and `ui/app/images/healfastLogo.png`. Replace with your assets if needed; the single script uses whatever is in the repo.
+- **HealsFast logos:** `ui/app/images/healfastLogoFull.png` and `ui/app/images/healfastLogo.png`. Replace with your assets if needed; the single script uses whatever is in the repo.
 
 ---
 
