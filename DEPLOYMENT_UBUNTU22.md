@@ -33,6 +33,16 @@ bash run-healfast-on-vps.sh --deploy-to 69.30.247.92
 
 This builds the app, rsyncs to **administrator@69.30.247.92:/opt/healfast-usa/**, then runs the script on the VPS (container + Nginx/SSL). Use **administrator**, not root.
 
+### Run the system (after setup or after reboot)
+
+To start or restart the HealFast USA system (app container + Nginx) without reinstalling:
+
+```bash
+sudo bash /opt/healfast-usa/run-healfast-on-vps.sh --run-system
+```
+
+Use this after a server reboot or whenever you want to bring the system up.
+
 ### After setup
 
 - **HTTPS:** https://clinic.healfastusa.org, https://admin.healfastusa.org, https://staff.healfastusa.org  
@@ -64,6 +74,12 @@ This frontend expects the Bahmni/OpenMRS backend to be running and reachable. Co
 
 ---
 
+## Publish / GitHub
+
+- **Public repo:** [https://github.com/aishikumar91/FRONTENDOPENMRSBAHMNI](https://github.com/aishikumar91/FRONTENDOPENMRSBAHMNI)
+- Push updates: `git push publish master` (remote `publish` points to the repo above).
+- `.github/workflows` were omitted from the initial push to avoid OAuth scope limits; you can add them later with a PAT that has the `workflow` scope if you want CI on that repo.
+
 ## Summary
 
 | Item        | Value |
@@ -72,3 +88,4 @@ This frontend expects the Bahmni/OpenMRS backend to be running and reachable. Co
 | Timezone   | Africa/Lagos |
 | SSL domains| clinic.healfastusa.org, admin.healfastusa.org, staff.healfastusa.org |
 | Script     | `run-healfast-on-vps.sh` |
+| Run system | `sudo bash run-healfast-on-vps.sh --run-system` |

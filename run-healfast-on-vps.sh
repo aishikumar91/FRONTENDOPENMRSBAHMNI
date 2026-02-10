@@ -9,15 +9,20 @@
 # and staff.healfastusa.org to 69.30.247.92 so Certbot can issue certificates.
 #
 # Usage:
-#   1. Copy this repo to the VPS:
-#        rsync -avz --exclude node_modules --exclude ui/node_modules --exclude micro-frontends/node_modules \
-#          ./openmrs-module-bahmniapps/ administrator@69.30.247.92:/opt/healfast-usa/
-#   2. SSH and run:
-#        ssh administrator@69.30.247.92
-#        sudo bash /opt/healfast-usa/run-healfast-on-vps.sh
+#   Run full setup (install deps, build, SSL, start system):
+#     sudo bash run-healfast-on-vps.sh
 #
-# Deploy from local machine (build + rsync + run on VPS):
-#        bash run-healfast-on-vps.sh --deploy-to 69.30.247.92
+#   Run system only (start/restart app + Nginx; use after reboot or to bring system up):
+#     sudo bash run-healfast-on-vps.sh --run-system
+#
+#   Copy repo to VPS then run on server:
+#     rsync -avz --exclude node_modules --exclude ui/node_modules --exclude micro-frontends/node_modules \
+#       ./openmrs-module-bahmniapps/ administrator@69.30.247.92:/opt/healfast-usa/
+#     ssh administrator@69.30.247.92
+#     sudo bash /opt/healfast-usa/run-healfast-on-vps.sh
+#
+#   Deploy from local machine (build + rsync + run on VPS):
+#     bash run-healfast-on-vps.sh --deploy-to 69.30.247.92
 #
 set -e
 
@@ -26,6 +31,7 @@ VPS_USER="${VPS_USER:-administrator}"
 APP_NAME="healfast-usa-apps"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_TO=""
+RUN_SYSTEM_ONLY=""
 TIMEZONE="Africa/Lagos"
 DOMAINS=(clinic.healfastusa.org admin.healfastusa.org staff.healfastusa.org)
 
@@ -34,6 +40,10 @@ while [[ $# -gt 0 ]]; do
     --deploy-to)
       DEPLOY_TO="$2"
       shift 2
+      ;;
+    --run-system)
+      RUN_SYSTEM_ONLY=1
+      shift
       ;;
     *)
       shift
@@ -78,7 +88,41 @@ if [[ "${1:-}" == "vps-only" ]]; then
   exit 0
 fi
 
-# ========== Run on VPS (Ubuntu 22) ==========
+# --- Run system only: start/restart app container + Nginx (no install/build) ---
+if [[ -n "$RUN_SYSTEM_ONLY" ]]; then
+  echo "=== HealFast USA – starting system ==="
+  sudo timedatectl set-timezone "$TIMEZONE" 2>/dev/null || true
+  echo "  Timezone: $TIMEZONE ($(date))"
+  if [[ -d /opt/healfast-usa ]]; then
+    cd /opt/healfast-usa
+  else
+    cd "$REPO_ROOT"
+  fi
+  # Start or restart app container
+  if sudo docker images -q "$APP_NAME" | grep -q .; then
+    sudo docker stop "$APP_NAME" 2>/dev/null || true
+    sudo docker rm "$APP_NAME" 2>/dev/null || true
+    sudo docker run -d -p 127.0.0.1:8091:8091 --name "$APP_NAME" --restart unless-stopped "$APP_NAME"
+    echo "  App container: started"
+  else
+    echo "  App image $APP_NAME not found. Run full setup first: sudo bash $0"
+    exit 1
+  fi
+  # Ensure Nginx is enabled and running
+  if command -v nginx &>/dev/null; then
+    sudo systemctl enable nginx 2>/dev/null || true
+    sudo systemctl start nginx 2>/dev/null || true
+    sudo systemctl reload nginx 2>/dev/null || true
+    echo "  Nginx: running"
+  fi
+  echo ""
+  echo "System is running. URLs:"
+  for d in "${DOMAINS[@]}"; do echo "  https://$d"; done
+  echo "  Logs: sudo docker logs -f $APP_NAME"
+  exit 0
+fi
+
+# ========== Run on VPS (Ubuntu 22) – full setup ==========
 echo "=== HealFast USA – full setup on Ubuntu 22 (${VPS_USER}@${VPS_IP}) ==="
 echo "  Domains: ${DOMAINS[*]}"
 echo "  Timezone: $TIMEZONE"
@@ -105,12 +149,14 @@ if ! command -v node &>/dev/null || [[ $(node -v 2>/dev/null | cut -d. -f1 | tr 
 fi
 node -v
 
-# 3) Yarn
-if ! command -v yarn &>/dev/null; then
+# 3) Yarn (use corepack if Node 18+; else npm global; overwrite if /usr/bin/yarn exists)
+if ! command -v yarn &>/dev/null || ! yarn -v &>/dev/null; then
   echo "[3/8] Installing Yarn..."
-  corepack enable 2>/dev/null || true
   sudo corepack enable 2>/dev/null || true
-  sudo npm install -g yarn
+  if ! command -v yarn &>/dev/null || ! yarn -v &>/dev/null; then
+    sudo rm -f /usr/bin/yarn /usr/bin/yarnpkg 2>/dev/null || true
+    sudo npm install -g yarn --force
+  fi
 fi
 yarn -v
 
@@ -175,7 +221,7 @@ NGINX_HTTP
 
 sudo ln -sf /etc/nginx/sites-available/healfast-usa /etc/nginx/sites-enabled/healfast-usa 2>/dev/null || true
 sudo rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
-sudo nginx -t && sudo systemctl reload nginx
+sudo nginx -t && sudo systemctl enable nginx && sudo systemctl reload nginx
 
 echo "[8/8] Obtaining SSL certificates (Let's Encrypt)..."
 CERTBOT_OPTS="--nginx -d clinic.healfastusa.org -d admin.healfastusa.org -d staff.healfastusa.org --redirect"
@@ -195,11 +241,14 @@ if sudo test -f /etc/letsencrypt/live/clinic.healfastusa.org/fullchain.pem 2>/de
 fi
 
 echo ""
-echo "=== HealFast USA setup complete ==="
+echo "=== HealFast USA setup complete – system is running ==="
 echo "  Timezone: $TIMEZONE ($(date))"
 echo "  App (container): http://127.0.0.1:8091"
 echo "  Public URLs (HTTPS):"
 for d in "${DOMAINS[@]}"; do echo "    https://$d"; done
+echo ""
+echo "  To run system again (after reboot or to restart):"
+echo "    sudo bash $(basename "$0") --run-system"
 echo ""
 echo "  Stop app:  sudo docker stop $APP_NAME"
 echo "  Logs:      sudo docker logs -f $APP_NAME"
