@@ -21,7 +21,7 @@ $gutter-width: 0;
 $columns: 12;
 $total-width: 100%;
 
-@import "compass";
+@import "../../../node_modules/compass-mixins/lib/compass";
 
 /*** grid form elements css start ***/
 .form-field-inline {

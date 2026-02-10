@@ -1,5 +1,7 @@
 'use strict';
 
+var path = require('path');
+
 module.exports = function (grunt) {
     // load all grunt tasks
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
@@ -87,9 +89,9 @@ module.exports = function (grunt) {
     grunt.initConfig({
         yeoman: yeomanConfig,
         watch: {
-            compass: {
+            sass: {
                 files: ['<%= yeoman.app %>/styles/**/*.{scss,sass}'],
-                tasks: ['compass:debug']
+                tasks: ['sass:debug']
             }
         },
         clean: {
@@ -169,21 +171,47 @@ module.exports = function (grunt) {
                 root: '.'
             }
         },
-        compass: {
+        sass: {
             options: {
-                sassDir: '<%= yeoman.app %>/styles',
-                cssDir: '<%= yeoman.app %>/styles/',
-                imagesDir: '<%= yeoman.app %>/images',
-                javascriptsDir: '<%= yeoman.app %>/scripts',
-                fontsDir: '<%= yeoman.app %>/styles/fonts',
-                importPath: '<%= yeoman.app %>/components',
-                relativeAssets: true
+                implementation: require('sass'),
+                includePaths: [
+                    '<%= yeoman.app %>/components',
+                    path.join(__dirname, 'node_modules')
+                ],
+                outputStyle: 'expanded',
+                sourceMap: false
             },
-            dist: {},
+            dist: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= yeoman.app %>/styles',
+                        src: ['*.scss', '**/*.scss'],
+                        dest: '<%= yeoman.app %>/styles',
+                        ext: '.css',
+                        filter: function (filepath) {
+                            return !require('path').basename(filepath).startsWith('_');
+                        }
+                    }
+                ]
+            },
             debug: {
                 options: {
-                    debugInfo: true
-                }
+                    outputStyle: 'expanded',
+                    sourceMap: true
+                },
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= yeoman.app %>/styles',
+                        src: ['*.scss', '**/*.scss'],
+                        dest: '<%= yeoman.app %>/styles',
+                        ext: '.css',
+                        filter: function (filepath) {
+                            return !require('path').basename(filepath).startsWith('_');
+                        }
+                    }
+                ]
             }
         },
         // Renames files for browser caching purposes
@@ -587,7 +615,7 @@ module.exports = function (grunt) {
         'eslint',
         'copy:nodeModules',
         'clean:dist',
-        'compass:dist',
+        'sass:dist',
         'useminPrepare',
         'ngAnnotate',
         'concat',
