@@ -63,7 +63,7 @@ Use this after a server reboot or whenever you want to bring the system up.
 From repo root:
 
 1. **Micro-frontends:** `cd micro-frontends && yarn install && yarn build`
-2. **UI:** `cd ui && yarn install && yarn ci`
+2. **UI:** `cd ui && yarn install && yarn build:no-test` (use `yarn ci` only if you have Chrome/Chromium for tests)
 3. **Docker:** `docker build -f package/docker/Dockerfile -t healfast-usa-apps .`
 
 ---

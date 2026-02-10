@@ -61,7 +61,7 @@ if [[ -n "$DEPLOY_TO" ]]; then
   echo "Building micro-frontends..."
   (cd "$REPO_ROOT/micro-frontends" && yarn install && yarn build)
   echo "Building UI..."
-  (cd "$REPO_ROOT/ui" && yarn install && yarn ci)
+  (cd "$REPO_ROOT/ui" && yarn install && yarn build:no-test)
   echo "Syncing to VPS..."
   rsync -avz --delete \
     --exclude 'node_modules' \
@@ -188,7 +188,7 @@ if [[ ! -d "$REPO_ROOT/ui/dist" ]] || [[ ! -f "$REPO_ROOT/ui/dist/index.html" ]]
   echo "  Building micro-frontends..."
   (cd "$REPO_ROOT/micro-frontends" && yarn install && yarn build)
   echo "  Building UI..."
-  (cd "$REPO_ROOT/ui" && yarn install && yarn ci)
+  (cd "$REPO_ROOT/ui" && yarn install && yarn build:no-test)
 fi
 
 sudo docker build -f "$REPO_ROOT/package/docker/Dockerfile" -t "$APP_NAME" "$REPO_ROOT"
