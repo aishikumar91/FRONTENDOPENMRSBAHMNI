@@ -16,9 +16,9 @@ RUN apk add --no-cache git
 
 WORKDIR /build/micro-frontends
 
-# Install dependencies
+# Install dependencies (bahmni-carbon-ui postinstall runs "git config core.hooksPath" - needs a repo)
 COPY micro-frontends/package.json micro-frontends/yarn.lock ./
-RUN yarn install --frozen-lockfile --production=false
+RUN git init && yarn install --frozen-lockfile --production=false
 
 # Copy source and build
 COPY micro-frontends/ ./
@@ -38,9 +38,9 @@ WORKDIR /build/ui
 # Copy micro-frontends build output
 COPY --from=micro-frontends-builder /build/micro-frontends/../ui/app/micro-frontends-dist ./app/micro-frontends-dist
 
-# Install UI dependencies
+# Install UI dependencies (git init in case any dep runs git config during postinstall)
 COPY ui/package.json ui/yarn.lock ./
-RUN yarn install --frozen-lockfile --production=false
+RUN git init && yarn install --frozen-lockfile --production=false
 
 # Copy UI source
 COPY ui/ ./
