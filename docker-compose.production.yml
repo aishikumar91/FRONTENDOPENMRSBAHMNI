@@ -1,0 +1,135 @@
+# ============================================================================
+# HealsFast USA - Production Docker Compose
+# ============================================================================
+# Usage:
+#   docker-compose -f docker-compose.production.yml up -d
+#   docker-compose -f docker-compose.production.yml down
+#   docker-compose -f docker-compose.production.yml logs -f healfast-usa-apps
+# ============================================================================
+
+version: '3.8'
+
+services:
+  healfast-usa-apps:
+    container_name: healfast-usa-apps
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      args:
+        - NODE_ENV=production
+    image: healfast-usa-apps:latest
+    
+    restart: unless-stopped
+    
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+      - TZ=Africa/Lagos
+      - BACKEND_BASE_URL=${BACKEND_BASE_URL:-}
+      - APP_NAME=HealsFast USA
+      - NGINX_WORKER_PROCESSES=${NGINX_WORKER_PROCESSES:-auto}
+      - NGINX_WORKER_CONNECTIONS=${NGINX_WORKER_CONNECTIONS:-1024}
+    
+    # Port binding (localhost only for security - Nginx reverse proxy will handle external access)
+    ports:
+      - "127.0.0.1:8091:8091"
+    
+    # Resource limits (adjust based on VPS capacity)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/health.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    
+    # Read-only root filesystem (except for nginx cache and logs)
+    read_only: false
+    
+    # Volumes for persistence (if needed)
+    volumes:
+      # Uncomment if you need to persist logs
+      # - ./logs/nginx:/var/log/nginx:rw
+      
+      # Uncomment if you need custom configuration override
+      # - ./config/nginx-custom.conf:/etc/nginx/conf.d/custom.conf:ro
+      
+      # Uncomment if you need to inject runtime environment config
+      # - ./config/env-config.js:/usr/share/nginx/html/bahmni/env-config.js:ro
+    
+    # Network configuration
+    networks:
+      - healfast-network
+    
+    # Labels for management
+    labels:
+      - "com.healfastusa.app=frontend"
+      - "com.healfastusa.environment=production"
+      - "com.healfastusa.version=1.1.0"
+
+networks:
+  healfast-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ============================================================================
+# Optional: Add backend service if running on same VPS
+# ============================================================================
+# Uncomment and configure if you want to run the Bahmni/OpenMRS backend
+# in the same docker-compose stack
+#
+#  bahmni-backend:
+#    container_name: bahmni-openmrs
+#    image: bahmni/openmrs:latest
+#    restart: unless-stopped
+#    environment:
+#      - DB_HOST=bahmni-db
+#      - DB_DATABASE=openmrs
+#      - DB_USERNAME=openmrs
+#      - DB_PASSWORD=${DB_PASSWORD}
+#    ports:
+#      - "127.0.0.1:8080:8080"
+#    networks:
+#      - healfast-network
+#    depends_on:
+#      - bahmni-db
+#
+#  bahmni-db:
+#    container_name: bahmni-mysql
+#    image: mysql:5.7
+#    restart: unless-stopped
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+#      - MYSQL_DATABASE=openmrs
+#      - MYSQL_USER=openmrs
+#      - MYSQL_PASSWORD=${DB_PASSWORD}
+#    volumes:
+#      - bahmni-db-data:/var/lib/mysql
+#    networks:
+#      - healfast-network
+#
+# volumes:
+#   bahmni-db-data:
+

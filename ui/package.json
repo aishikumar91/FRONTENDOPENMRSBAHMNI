@@ -129,7 +129,9 @@
     "uglify-and-rename": "grunt uglify-and-rename",
     "web": "grunt web",
     "ci": "grunt bundle && grunt uglify-and-rename && grunt web",
-    "build:no-test": "grunt bundle && grunt uglify-and-rename && grunt preprocess:web"
+    "build:no-test": "grunt bundle && grunt uglify-and-rename && grunt preprocess:web",
+    "start": "node -e \"var fs=require('fs'); if(!fs.existsSync('dist')||!fs.existsSync('dist/home/index.html')) { console.log('Building first (run: yarn build:no-test)...'); require('child_process').execSync('yarn build:no-test',{stdio:'inherit'}); }\" && npx --yes serve dist -l 3000",
+    "serve": "npx --yes serve dist -l 3000"
   },
   "repository": {
     "type": "git",

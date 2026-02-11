@@ -1,6 +1,70 @@
 # HealsFast USA – Deployment on Ubuntu 22 LTS VPS
 
-This app is branded as **HealsFast USA**. Deploy to Ubuntu 22 LTS at **administrator@69.30.247.92** with SSL for **clinic.healfastusa.org**, **admin.healfastusa.org**, and **staff.healfastusa.org**. Server timezone is **Africa/Lagos**.
+This app is branded as **HealsFast USA**. Deploy to Ubuntu 22 LTS at **administrator@69.30.247.92**.
+
+---
+
+## Start server locally (Windows / Mac / Linux)
+
+To run the HealsFast USA frontend on your machine for development or testing:
+
+### Prerequisites
+
+- **Node.js** (v18 or similar) and **Yarn**
+- **Ruby** and **Compass** (for the UI build): `gem install compass`
+
+### One-time: build micro-frontends
+
+From the **repo root**:
+
+```bash
+cd micro-frontends
+yarn install
+yarn build
+cd ..
+```
+
+### Build and serve the UI
+
+From the **repo root**:
+
+```bash
+cd ui
+yarn install
+yarn build:no-test
+yarn start
+```
+
+- **`yarn start`** builds if needed, then serves the app at **http://localhost:3000**.
+- **`yarn serve`** only serves `ui/dist` at http://localhost:3000 (run after a build).
+
+### Open the app
+
+- **Login / home:** http://localhost:3000/home/index.html  
+- **Landing (if you use Docker index):** the built app is under `/home/`, `/clinical/`, `/registration/`, etc.
+
+**Note:** The UI will load, but **login and APIs will fail** without a running Bahmni/OpenMRS backend. To test with data, run the full backend or point the app at a backend URL (via config).
+
+### Windows (PowerShell or CMD)
+
+Same steps; run from the repo root in **PowerShell** or **Command Prompt**:
+
+```powershell
+cd micro-frontends
+yarn install
+yarn build
+cd ..\ui
+yarn install
+yarn build:no-test
+yarn start
+```
+
+Then open in browser: **http://localhost:3000/home/index.html**
+
+- **Ruby/Compass:** Install [Ruby+Devkit](https://rubyinstaller.org/) then run `gem install compass` in a new terminal.
+- **Node/Yarn:** Use the installers or [nvm-windows](https://github.com/coreybutler/nvm-windows). No `sudo` on Windows.
+
+---
 
 ## Single script (recommended)
 
