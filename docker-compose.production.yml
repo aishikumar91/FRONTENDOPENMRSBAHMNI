@@ -67,15 +67,8 @@ services:
     read_only: false
     
     # Volumes for persistence (if needed)
-    volumes:
-      # Uncomment if you need to persist logs
-      # - ./logs/nginx:/var/log/nginx:rw
-      
-      # Uncomment if you need custom configuration override
-      # - ./config/nginx-custom.conf:/etc/nginx/conf.d/custom.conf:ro
-      
-      # Uncomment if you need to inject runtime environment config
-      # - ./config/env-config.js:/usr/share/nginx/html/bahmni/env-config.js:ro
+    # Must be a list; use [] when no mounts needed. To add: - ./path/host:/path/container:ro
+    volumes: []
     
     # Network configuration
     networks:
