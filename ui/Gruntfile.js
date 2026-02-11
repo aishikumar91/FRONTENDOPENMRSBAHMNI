@@ -273,12 +273,8 @@ module.exports = function (grunt) {
         imagemin: {
             dist: {
                 options: {
-                    // Omit gifsicle so build works in Docker (gifsicle binary often fails to load)
-                    use: [
-                        require('imagemin-jpegtran')(),
-                        require('imagemin-optipng')(),
-                        require('imagemin-svgo')()
-                    ]
+                    // Use only SVGO (pure JS). gifsicle/optipng/jpegtran binaries fail in Alpine Docker (ENOENT).
+                    use: [require('imagemin-svgo')()]
                 },
                 files: [
                     {
